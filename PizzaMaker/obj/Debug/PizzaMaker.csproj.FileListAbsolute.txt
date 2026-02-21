@@ -1,0 +1,8 @@
+C:\Users\DaSTeR\OneDrive\Рабочий стол\Projects\PizzaMaker\PizzaMaker\bin\Debug\PizzaMaker.exe.config
+C:\Users\DaSTeR\OneDrive\Рабочий стол\Projects\PizzaMaker\PizzaMaker\bin\Debug\PizzaMaker.exe
+C:\Users\DaSTeR\OneDrive\Рабочий стол\Projects\PizzaMaker\PizzaMaker\bin\Debug\PizzaMaker.pdb
+C:\Users\DaSTeR\OneDrive\Рабочий стол\Projects\PizzaMaker\PizzaMaker\obj\Debug\PizzaMaker.csproj.AssemblyReference.cache
+C:\Users\DaSTeR\OneDrive\Рабочий стол\Projects\PizzaMaker\PizzaMaker\obj\Debug\PizzaMaker.csproj.CoreCompileInputs.cache
+C:\Users\DaSTeR\OneDrive\Рабочий стол\Projects\PizzaMaker\PizzaMaker\obj\Debug\PizzaMaker.exe
+C:\Users\DaSTeR\OneDrive\Рабочий стол\Projects\PizzaMaker\PizzaMaker\obj\Debug\PizzaMaker.pdb
+C:\Users\DaSTeR\OneDrive\Рабочий стол\Projects\PizzaMaker\PizzaMaker\obj\Debug\PizzaMaker.exe.config
