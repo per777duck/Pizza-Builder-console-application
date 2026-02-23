@@ -1,24 +1,80 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace PizzaMaker
 {
+    interface IManager
+    {
+        void Adding();
+        void Removing();
+        void Editing();
+    }
+
     class Ingredient
     {
-        public string Name { get; set; }
-        public int Price { get; set; }
+        private string _name;
+        private int _price;
+        public string Name 
+        {
+            get { return _name; } 
+            set { _name = value; }
+        }
+        public int Price 
+        {
+            get { return _price; }
+            set { _price = value; }
+        }
 
         public override string ToString()
         {
-            return $"{Name} | цена: {Price} руб.\n";
+            return $"{_name} | цена: {_price} руб.";
+        }
+    }
+
+    class Border
+    {
+        private string _name;
+        private List<Pizza> _availablePizzas;
+        private Ingredient _ingridient;
+        public string Name 
+        {
+            get { return _name; }
+            set { _name = value; }
+        }
+        public int Price
+        {
+            get 
+            {
+                if (_ingridient == null)
+                    return 0;
+
+                return _ingridient.Price;
+            }
+        }
+        public List<Pizza> AvailablePizzas
+        {
+            get { return _availablePizzas; }
+            set { _availablePizzas = value; }
+        }
+        public Ingredient UsedIngridient
+        {
+            get { return _ingridient; }
+            set { _ingridient = value; }
         }
     }
 
     class Base
     {
-        public string Name { get; set; }
-        private static int _classic_base_price;
+        private string _name;
         private int _price;
+        private static int _classic_base_price;
+        public string Name 
+        {
+            get { return _name; } 
+            set { _name = value; }
+        }
+        
         public int Price
         {
             get { return _price; }
@@ -50,24 +106,60 @@ namespace PizzaMaker
 
         public override string ToString()
         {
-            return $"{Name} | цена: {Price} руб.\n";
+            return $"{_name} | цена: {_price} руб.";
         }
     }
 
     class Pizza
     {
-        public string Name { get; set; }
-        public int Price { get; set; }
-        public Base PizzaBase { get; set; }
-        public List<Ingredient> Ingredients { get; set; }
+        private string _name;
+        private int _price;
+        private Base _pizzaBase;
+        private Border _border;
+        private List<Ingredient> _ingredients;
+        public string Name 
+        { 
+            get { return _name; }
+            set { _name = value; }
+        }
+        public int Price
+        {
+            get { return _price; }
+            set { _price = CountingPrice(); }
+        }
+        public Base PizzaBase 
+        {
+            get { return _pizzaBase; }
+            set { _pizzaBase = value; }
+        }
+        public Border PizzaBorder
+        {
+            get { return _border; }
+            set { _border = value; }
+        }
+        public List<Ingredient> Ingredients
+        {
+            get { return _ingredients; }
+            set { _ingredients = value; }
+        }
+
+        private int CountingPrice()
+        {
+            int total = (PizzaBase.Price + PizzaBorder.Price);
+            for (int i = 0; i < Ingredients.Count; i++)
+            {
+                total += Ingredients[i].Price;
+            }
+            return total;
+        }
 
         public override string ToString()
         {
-            return $"{Name} | цена: {Price} руб.\n";
+            return $"{_name} | цена: {_price} руб.";
         }
     }
 
-    class ManageIngredients
+    class ManageIngredients : IManager
     {
         private List<Ingredient> Ingredients;
 
@@ -83,6 +175,9 @@ namespace PizzaMaker
 
         public void PrintIngredients()
         {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("=== СПИСОК ИНГРЕДИЕНТОВ ===\n");
+            Console.ResetColor();
             for (int i = 0; i < Ingredients.Count; i++)
             {
                 Console.WriteLine($"{i + 1}." + Ingredients[i].ToString());
@@ -233,7 +328,7 @@ namespace PizzaMaker
                 int ingredient_to_remove = -1;
 
                 if (!int.TryParse(Console.ReadLine().Trim(), out ingredient_to_remove) ||
-                    ingredient_to_remove < 1 || ingredient_to_remove > Ingredients.Count)
+                    ingredient_to_remove < 0 || ingredient_to_remove > Ingredients.Count)
                 {
                     Console.Clear();
                     Console.ForegroundColor = ConsoleColor.Cyan;
@@ -302,7 +397,7 @@ namespace PizzaMaker
                 Console.ResetColor();
 
                 if (!int.TryParse(Console.ReadLine().Trim(), out ingredient_to_edit) ||
-                    ingredient_to_edit < 1 || ingredient_to_edit > Ingredients.Count)
+                    ingredient_to_edit < 0 || ingredient_to_edit > Ingredients.Count)
                 {
                     Console.Clear();
                     Console.ForegroundColor = ConsoleColor.Cyan;
@@ -474,7 +569,7 @@ namespace PizzaMaker
         }
     }
 
-    class ManageBase
+    class ManageBase : IManager
     {
         private List<Base> Bases;
         private const string CLASSIC_BASE_NAME = "Классическая";
@@ -491,9 +586,12 @@ namespace PizzaMaker
 
         public void PrintBases()
         {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("=== СПИСОК ОСНОВ ===\n");
+            Console.ResetColor();
             for (int i = 0; i < Bases.Count; i++)
             {
-                Console.Write($"{i + 1}." + Bases[i].ToString());
+                Console.WriteLine($"{i + 1}." + Bases[i].ToString());
             }
         }
 
@@ -658,7 +756,7 @@ namespace PizzaMaker
                 Console.ResetColor();
 
                 if (!int.TryParse(Console.ReadLine().Trim(), out base_to_remove) ||
-                    base_to_remove < 1 || base_to_remove > Bases.Count)
+                    base_to_remove < 0 || base_to_remove > Bases.Count)
                 {
                     Console.Clear();
                     Console.ForegroundColor = ConsoleColor.Cyan;
@@ -735,7 +833,7 @@ namespace PizzaMaker
                 Console.ResetColor();
 
                 if (!int.TryParse(Console.ReadLine().Trim(), out base_to_edit) ||
-                    base_to_edit < 1 || base_to_edit > Bases.Count)
+                    base_to_edit < 0 || base_to_edit > Bases.Count)
                 {
                     Console.Clear();
                     Console.ForegroundColor = ConsoleColor.Cyan;
@@ -837,11 +935,11 @@ namespace PizzaMaker
                         Console.ForegroundColor = ConsoleColor.Cyan;
                         Console.WriteLine($"=== РЕДАКТИРОВАНИЕ ОСНОВЫ: {Bases[base_to_edit - 1]} ===\n");
                         Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine("Введите стоимость основы для пиццы или 0 чтобы отменить редактирование:\n");
+                        Console.WriteLine("Введите стоимость основы для пиццы или -1 чтобы отменить редактирование:\n");
                         Console.ResetColor();
 
-                        int new_price = -1;
-                        if (!int.TryParse(Console.ReadLine().Trim(), out new_price) || new_price < 0)
+                        int new_price = -2;
+                        if (!int.TryParse(Console.ReadLine().Trim(), out new_price) || new_price < -1)
                         {
                             Console.Clear();
                             Console.ForegroundColor = ConsoleColor.Cyan;
@@ -855,7 +953,7 @@ namespace PizzaMaker
                             continue;
                         }
 
-                        if (new_price == 0)
+                        if (new_price == -1)
                             return;
 
                         if (Bases[base_to_edit - 1].Name != CLASSIC_BASE_NAME)
@@ -910,21 +1008,27 @@ namespace PizzaMaker
         }
     }
 
-    class ManagePizza
+    class ManagePizza : IManager
     {
         private List<Pizza> Pizzas;
         private List<Ingredient> Available_ingredients;
         private List<Base> Available_bases;
+        private List<Border> Available_Borders;
 
-        public ManagePizza(List<Ingredient> ingredients, List<Base> bases)
+        public ManagePizza(List<Pizza> pizzas, List<Ingredient> ingredients, 
+            List<Base> bases, List<Border> availableBorders)
         {
-            Pizzas = new List<Pizza>();
+            Pizzas = pizzas;
             Available_bases = bases;
             Available_ingredients = ingredients;
+            Available_Borders = availableBorders;
         }
 
         public void PrintPizzas()
         {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("=== СПИСОК ПИЦЦ ===\n");
+            Console.ResetColor();
             for (int i = 0; i < Pizzas.Count; i++)
             {
                 Console.WriteLine($"{i + 1}." + Pizzas[i].ToString());
@@ -955,7 +1059,7 @@ namespace PizzaMaker
             PrintIngredients(pizza);
         }
 
-        public void PrintAvailableBases()
+        private void PrintAvailableBases()
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("Доступные основы:\n");
@@ -966,7 +1070,73 @@ namespace PizzaMaker
             }
         }
 
-        public void PrintAvailableIngredients()
+        private List<int> PrintAvailableBorders(Pizza pizza)
+        {
+            List<int> border_indexes = new List<int>();
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("Доступные бортики:\n");
+            Console.ResetColor();
+            for (int i = 0; i < Available_Borders.Count; i++)
+            {
+                for (int j = 0; j < Available_Borders[i].AvailablePizzas.Count; j++)
+                {
+                    if (Available_Borders[i].AvailablePizzas[j].Name == pizza.Name)
+                    {
+                        border_indexes.Add(i);
+                        Console.WriteLine($"{i + 1}.{Available_Borders[i].Name} | Цена: {Available_Borders[i].Price} руб.");
+                        break;
+                    }
+                }
+            }
+
+            return border_indexes;
+        }
+
+        private void PrintBorders(List<int> border_indexes)
+        {
+            if (border_indexes.Count > 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Доступные бортики:");
+                Console.ResetColor();
+                for (int i = 0; i < border_indexes.Count; i++)
+                {
+                    Console.WriteLine($"{i + 1}.{Available_Borders[border_indexes[i]].Name} " +
+                        $"| Цена:{Available_Borders[border_indexes[i]].Price} руб.");
+                }
+
+                return;
+            }
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Доступные бортики:");
+            Console.ResetColor();
+            for (int i = 0; i < Available_Borders.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}.{Available_Borders[i].Name} | Цена:{Available_Borders[i].Price} руб.");
+            }
+        }
+
+        private void PrintBordersFromAll()
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Доступные бортики:");
+            Console.ResetColor();
+            for (int i = 0; i < Available_Borders.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}.{Available_Borders[i].Name} | Цена:{Available_Borders[i].Price} руб.");
+            }
+        }
+
+        private void AddAvailablePizza(List<int> border_indexes, Pizza pizza)
+        {
+            for (int i = 0; i < border_indexes.Count; i++)
+            {
+                Available_Borders[border_indexes[i]].AvailablePizzas.Add(pizza);
+            }
+        }
+
+        private void PrintAvailableIngredients()
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("Доступные ингредиенты:\n");
@@ -977,9 +1147,9 @@ namespace PizzaMaker
             }
         }
 
-        public int CalculatingPizzaPrice(Base selected_base, List<Ingredient> selected_ingredients)
+        private int CalculatingPizzaPrice(Border selected_border, Base selected_base, List<Ingredient> selected_ingredients)
         {
-            int total_sum = selected_base.Price;
+            int total_sum = (selected_base.Price + selected_border.Price);
             foreach (Ingredient ingr in selected_ingredients)
             {
                 total_sum += ingr.Price;
@@ -1075,16 +1245,16 @@ namespace PizzaMaker
             {
                 Console.Clear();
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine($"=== СОЗДАНИЕ ПИЦЦЫ: {name} ===\n\n");
+                Console.WriteLine($"=== СОЗДАНИЕ ПИЦЦЫ: {name} ===\n");
                 Console.ResetColor();
 
                 PrintAvailableBases();
-
+                 
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("\nВыберите основу для пиццы, введите номер или 0 чтобы отменить создание: ");
                 Console.ResetColor();
 
-                if (!int.TryParse(Console.ReadLine(), out base_index) || base_index < 1 || base_index > Available_bases.Count)
+                if (!int.TryParse(Console.ReadLine(), out base_index) || base_index < 0 || base_index > Available_bases.Count)
                 {
                     Console.Clear();
                     Console.ForegroundColor = ConsoleColor.Cyan;
@@ -1110,20 +1280,163 @@ namespace PizzaMaker
                 break;
             }
 
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine($"=== СОЗДАНИЕ ПИЦЦЫ: {name} ===\n");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Хотите ли вы добавить доступные бортики с ингредиентами для этой пиццы?");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("По умолчанию доступны все бортики.");
+            Console.Write("Введите да/нет:");
+            
+            string answer = Console.ReadLine().Trim().ToLower();
+            List<int> border_indexes = new List<int>();
+            if (answer == "да")
+            {
+                while (true)
+                {
+                    Console.Clear();
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine($"=== СОЗДАНИЕ ПИЦЦЫ: {name} ===\n");
+                    Console.ResetColor();
+                    PrintBordersFromAll();
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("Введите номер бортика, чтобы сделать его доступным для пиццы или 0 чтобы выйти.");
+                    Console.ResetColor();
+
+                    int choice = -1;
+                    if (!int.TryParse(Console.ReadLine().Trim(), out choice) ||
+                        choice < 0 || choice > Available_Borders.Count)
+                    {
+                        Console.Clear();
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.WriteLine($"=== СОЗДАНИЕ ПИЦЦЫ: {name} ===\n");
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("Такого бортика нет! Попробуйте еще раз.");
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.WriteLine("Нажмите Enter чтобы продолжить...");
+                        Console.ReadLine();
+                        continue;
+                    }
+
+                    if (choice == 0)
+                    {
+                        break;
+                    }
+
+                    border_indexes.Add(choice - 1);
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Бортик успешно добавлен!");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("Нажмите Enter чтобы продолжить...");
+                    Console.ReadLine();
+                }
+            }
+
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine($"=== СОЗДАНИЕ ПИЦЦЫ: {name} ===\n");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Хотите ли вы добавить бортик с ингредиентами?");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("По умолчанию стоит классический бортик.");
+            Console.Write("Введите да/нет:");
+
+            Border selected_border = Available_Borders[0];
+            answer = Console.ReadLine().Trim().ToLower();
+            if (answer == "да")
+            {
+                while (true)
+                {
+                    Console.Clear();
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine($"=== СОЗДАНИЕ ПИЦЦЫ: {name} ===\n");
+                    PrintBorders(border_indexes);
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("Какой бортик вы хотите выбрать, введите номер или 0 чтобы отменить");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    
+                    int choice = -1;
+                    if (border_indexes.Count > 0)
+                    {
+                        if (!int.TryParse(Console.ReadLine().Trim(), out choice) ||
+                        choice < 0 || choice > border_indexes.Count)
+                        {
+                            Console.Clear();
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            Console.WriteLine($"=== СОЗДАНИЕ ПИЦЦЫ: {name} ===\n");
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("Такого бортика нет! Попробуйте еще раз.");
+                            Console.ForegroundColor = ConsoleColor.DarkGray;
+                            Console.WriteLine("Нажмите Enter чтобы продолжить...");
+                            Console.ReadLine();
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        if (!int.TryParse(Console.ReadLine().Trim(), out choice) ||
+                            choice < 0 || choice > Available_Borders.Count)
+                        {
+                            Console.Clear();
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            Console.WriteLine($"=== СОЗДАНИЕ ПИЦЦЫ: {name} ===\n");
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("Такого бортика нет! Попробуйте еще раз.");
+                            Console.ForegroundColor = ConsoleColor.DarkGray;
+                            Console.WriteLine("Нажмите Enter чтобы продолжить...");
+                            Console.ReadLine();
+                            continue;
+                        }
+                    }
+                    if (choice == 0)
+                    {
+                        break;
+                    }
+
+                    if (border_indexes.Count > 0)
+                    {
+                        selected_border = Available_Borders[border_indexes[choice - 1]];
+                        Console.Clear();
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.WriteLine($"=== СОЗДАНИЕ ПИЦЦЫ: {name} ===\n");
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("Бортик успешно добавлен!");
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.WriteLine("Нажмите Enter чтобы продолжить...");
+                        Console.ReadLine();
+                        break;
+                    }
+
+                    selected_border = Available_Borders[choice - 1];
+                    Console.Clear();
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine($"=== СОЗДАНИЕ ПИЦЦЫ: {name} ===\n");
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Бортик успешно добавлен!");
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("Нажмите Enter чтобы продолжить...");
+                    Console.ReadLine();
+                    break;
+                }
+            }
+
+            Console.ResetColor();
             List<Ingredient> selected_ingredients = new List<Ingredient>();
             bool adding = true;
             while (adding)
             {
                 Console.Clear();
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine($"=== СОЗДАНИЕ ПИЦЦЫ: {name} ===\n");
+                Console.WriteLine($"=== СОЗДАНИЕ ПИЦЦЫ: {name} ===");
                 Console.ResetColor();
 
-                Console.WriteLine($"\nВыбраная основа: {selected_base.Name}\n");
+                Console.WriteLine($"Выбраная основа: {selected_base.Name}");
+                Console.WriteLine($"Выбраный бортик: {selected_border.Name}\n");
                 PrintAvailableIngredients();
 
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("\nВыберите ингредиент для добавления, введите номер или 0 для завершения: ");
+                Console.WriteLine("Выберите ингредиент для добавления, введите номер или 0 для завершения: ");
                 Console.ResetColor();
 
                 int ingredient_index;
@@ -1160,15 +1473,12 @@ namespace PizzaMaker
                     Console.ForegroundColor = ConsoleColor.Cyan;
                     Console.WriteLine($"=== СОЗДАНИЕ ПИЦЦЫ: {name} ===\n");
                     Console.ResetColor();
-
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("\nЭтот ингредиент уже добавлен!\n");
+                    Console.WriteLine("Этот ингредиент уже добавлен!");
                     Console.ResetColor();
-
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     Console.WriteLine("Нажмите Enter чтобы продолжить...");
                     Console.ResetColor();
-
                     Console.ReadLine();
                     continue;
                 }
@@ -1184,7 +1494,7 @@ namespace PizzaMaker
                 Console.WriteLine($"Ингредиент {selected_ingredient.Name} успешно добавлен!\n");
                 Console.ResetColor();
 
-                int current_price = CalculatingPizzaPrice(selected_base, selected_ingredients);
+                int current_price = CalculatingPizzaPrice(selected_border, selected_base, selected_ingredients);
                 Console.WriteLine($"Текущая стоимость пиццы: {current_price} руб.");
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.WriteLine("Нажмите Enter для продолжения...");
@@ -1192,32 +1502,41 @@ namespace PizzaMaker
                 Console.ReadLine();
             }
 
-            int total_price = CalculatingPizzaPrice(selected_base, selected_ingredients);
+            int total_price = CalculatingPizzaPrice(selected_border, selected_base, selected_ingredients);
 
             Pizza new_pizza = new Pizza
             {
                 Name = name,
-                Price = total_price,
                 PizzaBase = selected_base,
-                Ingredients = selected_ingredients
+                Ingredients = selected_ingredients,
+                PizzaBorder = selected_border,
+                Price = total_price,
             };
 
             Pizzas.Add(new_pizza);
+            AddAvailablePizza(border_indexes, new_pizza);
+
+            List<Border> temp_borders = new List<Border>();
+            for (int i = 0; i < border_indexes.Count; i++)
+            {
+                temp_borders
+            }
 
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine($"=== СОЗДАНИЕ ПИЦЦЫ: {name} ===\n");
             Console.ResetColor();
 
-            Console.WriteLine($"Основа: {selected_base.Name}\n");
-            Console.WriteLine("Добавленные ингредиенты:\n");
+            Console.WriteLine($"Основа: {selected_base.Name}");
+            Console.WriteLine($"Бортик: {selected_border.Name}");
+            Console.WriteLine("Добавленные ингредиенты:");
             foreach (Ingredient ingr in selected_ingredients)
             {
-                Console.WriteLine($" - {ingr.Name} | цена: {ingr.Price} руб.\n");
+                Console.WriteLine($" - {ingr.Name} | цена: {ingr.Price} руб.");
             }
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"Новая пицца успешно создана!\n");
+            Console.WriteLine($"\nНовая пицца успешно создана!");
             Console.ResetColor();
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -1284,17 +1603,6 @@ namespace PizzaMaker
 
                 if (pizza_to_delete == 0)
                 {
-                    Console.Clear();
-                    Console.ForegroundColor = ConsoleColor.Cyan;
-                    Console.WriteLine("=== УДАЛЕНИЕ ПИЦЦЫ ===\n");
-                    Console.ResetColor();
-
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.WriteLine("\nУдаление отменено.\n");
-                    Console.WriteLine("Нажмите Enter чтобы продолжить...");
-                    Console.ResetColor();
-
-                    Console.ReadLine();
                     return;
                 }
 
@@ -1489,6 +1797,7 @@ namespace PizzaMaker
                         Console.WriteLine("\nЧто вы хотите поменять?\n");
                         Console.WriteLine("1.Ингредиенты");
                         Console.WriteLine("2.Основы(только изменение)");
+                        Console.WriteLine("3.Бортик(только изменение)");
                         Console.WriteLine("0.Отменить изменения");
                         Console.WriteLine("\nВведите номер: ");
                         Console.ResetColor();
@@ -1694,7 +2003,7 @@ namespace PizzaMaker
                                         Console.ResetColor();
 
                                         if (!int.TryParse(Console.ReadLine().Trim(), out int index_base) ||
-                                            index_base < 1 || index_base > Available_bases.Count)
+                                            index_base < 0 || index_base > Available_bases.Count)
                                         {
                                             Console.Clear();
                                             Console.ForegroundColor = ConsoleColor.Cyan;
@@ -1736,6 +2045,54 @@ namespace PizzaMaker
                                     }
                                     break;
                                 }
+
+                            case "3":
+                                while (true)
+                                {
+                                    Console.Clear();
+                                    Console.ForegroundColor = ConsoleColor.Cyan;
+                                    Console.WriteLine($"=== РЕДАКТИРОВАНИЕ ПИЦЦЫ: {Pizzas[pizza_to_edit - 1]} ===\n\n");
+                                    Console.ResetColor();
+                                    List<int> border_indexes = PrintAvailableBorders(Pizzas[pizza_to_edit - 1]);
+                                    Console.ForegroundColor = ConsoleColor.Yellow;
+                                    Console.WriteLine("Введите номер бортика на который вы хотите добавить в пиццу или 0 чтобы выйти:");
+                                    Console.ResetColor();
+
+                                    int new_border = -1;
+                                    if (!int.TryParse(Console.ReadLine().Trim(), out new_border) ||
+                                            new_border < 0 || new_border > border_indexes.Count)
+                                    {
+                                        Console.Clear();
+                                        Console.ForegroundColor = ConsoleColor.Cyan;
+                                        Console.WriteLine($"=== РЕДАКТИРОВАНИЕ ПИЦЦЫ: {Pizzas[pizza_to_edit - 1]} ===\n\n");
+                                        Console.ForegroundColor = ConsoleColor.Red;
+                                        Console.WriteLine("Неверный ввод номера!");
+                                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                                        Console.WriteLine("Нажмите Enter чтобы продолжить...");
+                                        Console.ResetColor();
+                                        Console.ReadLine();
+                                        continue;
+                                    }
+
+                                    if (new_border == 0)
+                                    {
+                                        return;
+                                    }
+
+                                    Pizzas[pizza_to_edit - 1].PizzaBorder = Available_Borders[border_indexes[new_border - 1]];
+
+                                    Console.Clear();
+                                    Console.ForegroundColor = ConsoleColor.Cyan;
+                                    Console.WriteLine($"=== РЕДАКТИРОВАНИЕ ПИЦЦЫ: {Pizzas[pizza_to_edit - 1]} ===\n\n");
+                                    Console.ForegroundColor = ConsoleColor.Green;
+                                    Console.WriteLine("Бортик успешно изменен!");
+                                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                                    Console.WriteLine("Нажмите Enter чтобы продолжить...");
+                                    Console.ResetColor();
+                                    Console.ReadLine();
+                                    break;
+                                }
+                                break;
 
                             case "0":
                                 break;
@@ -1797,19 +2154,104 @@ namespace PizzaMaker
                 new Ingredient {Name = "Томаты", Price = 40},
                 new Ingredient {Name = "Пеперони", Price = 35},
                 new Ingredient {Name = "Лук", Price = 25},
-                new Ingredient {Name = "Базилик", Price = 45}
+                new Ingredient {Name = "Базилик", Price = 45},
+                new Ingredient {Name = "Креветки", Price = 60},
+                new Ingredient {Name = "Крабовое мясо", Price = 100},
+                new Ingredient {Name = "Кунжут", Price = 40},
+                new Ingredient {Name = "Ананас", Price = 50},
+                new Ingredient {Name = "Грибы", Price = 45},
+                new Ingredient {Name = "Маслины", Price = 40},
+                new Ingredient {Name = "Говяжий фарш", Price = 70},
+                new Ingredient {Name = "Курица", Price = 55}
             };
 
             List<Base> bases = new List<Base>()
             {
-                new Base {Name = "Классическая", Price = 220},
+                new Base {Name = "Классическая", Price = 250},
                 new Base {Name = "Тонкое", Price = 200},
                 new Base {Name = "Слоеное", Price = 210},
+                new Base {Name = "Черное", Price = 230},
+                new Base {Name = "Толстое", Price = 270},
+                new Base {Name = "Чесночное", Price = 260}
             };
+
+            List<Pizza> pizzas = new List<Pizza>()
+            {
+                new Pizza
+                {
+                    Name = "Маргарита",
+                    PizzaBase = bases[0],
+                    Ingredients = new List<Ingredient>()
+                    {
+                        ingredients[0], ingredients[1], ingredients[4]
+                    }
+                },
+                new Pizza
+                {
+                    Name = "Ананасовая",
+                    PizzaBase = bases[1],
+                    Ingredients = new List<Ingredient>()
+                    {
+                        ingredients[0], ingredients[12], ingredients[8], ingredients[7]
+                    }
+                },
+                new Pizza
+                {
+                    Name = "Пеперони",
+                    PizzaBase = bases[4],
+                    Ingredients = new List<Ingredient>()
+                    {
+                        ingredients[0], ingredients[1], ingredients[1]
+                    }
+                }
+            };
+
+            List<Border> borders = new List<Border>()
+            {
+                new Border
+                {
+                    Name = "Классический",
+                    AvailablePizzas = new List<Pizza>()
+                    {
+                        pizzas[1], pizzas[2], pizzas[0]
+                    },
+                    UsedIngridient = null
+                },
+                new Border
+                {
+                    Name = "С кунжутом",
+                    AvailablePizzas = new List<Pizza>()
+                    {
+                        pizzas[1], pizzas[2]
+                    },
+                    UsedIngridient = ingredients[7]
+                },
+                new Border
+                {
+                    Name = "С сыром",
+                    AvailablePizzas = new List<Pizza>()
+                    {
+                        pizzas[2]
+                    },
+                    UsedIngridient = ingredients[0]
+                },
+                new Border
+                {
+                    Name = "С томатами",
+                    AvailablePizzas = new List<Pizza>()
+                    {
+                        pizzas[0], pizzas[1], pizzas[2]
+                    },
+                    UsedIngridient = ingredients[1]
+                }
+            };
+
+            pizzas[0].PizzaBorder = borders[0]; pizzas[1].PizzaBorder = borders[0]; pizzas[2].PizzaBorder = borders[0];
+            pizzas[0].Price = 0; pizzas[1].Price = 0; pizzas[2].Price = 0;
 
             ManageIngredients ingredients_manager = new ManageIngredients(ingredients);
             ManageBase base_manager = new ManageBase(bases);
-            ManagePizza pizza_manager = new ManagePizza(ingredients, bases);
+            ManagePizza pizza_manager = new ManagePizza(pizzas, ingredients, bases, borders);
 
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("=== Добро пожаловать в онлайн пиццерию 'The Dalmatian Pizza' ===\n");
@@ -2047,7 +2489,7 @@ namespace PizzaMaker
                         Console.WriteLine("Нажмите Enter чтобы продолжить...");
                         Console.ReadLine();
                         break;
-                }
+                }   
 
                 Console.ResetColor();
             }
