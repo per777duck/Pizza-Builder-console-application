@@ -55,6 +55,19 @@ namespace PizzaMaker.Managers
             PrintIngredients(pizza);
         }
 
+        public void PrintPizza(Pizza pizza)
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine($"=== СОСТАВ ПИЦЦЫ: {pizza.Name} ===\n");
+            Console.ResetColor();
+            Console.WriteLine($"Используемая основа: {pizza.PizzaBase.Name} | цена: {pizza.PizzaBase.Price} руб.");
+            Console.WriteLine($"Используемый бортик: {pizza.PizzaBorder.Name} | цена: {pizza.PizzaBorder.Price} руб.");
+            Console.WriteLine("Используемые ингредиенты:\n");
+            Console.ResetColor();
+
+            PrintIngredients(pizza);
+        }
+
         private void PrintAvailableBases()
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
@@ -201,7 +214,7 @@ namespace PizzaMaker.Managers
 
             foreach (Pizza pizza in filtred_pizzas)
             {
-                PrintPizzaStructure(pizza);
+                PrintPizza(pizza);
                 Console.WriteLine("\n");
             }
             Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -245,7 +258,7 @@ namespace PizzaMaker.Managers
 
             foreach (Pizza pizza in filtred_pizzas)
             {
-                PrintPizzaStructure(pizza);
+                PrintPizza(pizza);
                 Console.WriteLine("\n");
             }
             Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -289,7 +302,7 @@ namespace PizzaMaker.Managers
 
             foreach (Pizza pizza in filtred_pizzas)
             {
-                PrintPizzaStructure(pizza);
+                PrintPizza(pizza);
                 Console.WriteLine("\n");
             }
             Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -406,7 +419,7 @@ namespace PizzaMaker.Managers
                 Console.WriteLine("3. По возрастанию цены");
                 Console.WriteLine("4. Ингредиенты");
                 Console.WriteLine("5. Основа");
-                Console.WriteLine("6. Ботик");
+                Console.WriteLine("6. Бортик");
                 Console.WriteLine("0. Вернуться назад\n");
                 Console.WriteLine("Выберите тип фильтрации и введите номер: ");
                 Console.ResetColor();
